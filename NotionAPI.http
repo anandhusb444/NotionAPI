@@ -1,0 +1,6 @@
+@NotionAPI_HostAddress = http://localhost:5177
+
+GET {{NotionAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
