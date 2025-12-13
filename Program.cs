@@ -23,9 +23,20 @@ namespace NotionAPI
 
             builder.Services.AddScoped<IuserService, UserService>();
 
+            builder.Services.AddCors(option =>
+            {
+                option.AddPolicy("ReactPolicy", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                });
+            });
+
+
             var app = builder.Build();
 
-            
+            app.UseCors("ReactPolicy");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

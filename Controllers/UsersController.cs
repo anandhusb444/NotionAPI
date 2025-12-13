@@ -2,6 +2,7 @@
 using NotionAPI.DTOs.User;
 using NotionAPI.Models;
 using NotionAPI.Services;
+using NotionAPI.Utilites;
 
 namespace NotionAPI.Controllers
 {
@@ -19,15 +20,26 @@ namespace NotionAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUser(UserDto user)
         {
-            bool isAdded = await _userService.AddUser(user);
+            GenericRespones<Users> isAdded = await _userService.AddUser(user);
 
-            if(!isAdded)
+            if(!isAdded.Status)
             {
                 return BadRequest();
             }
 
             return Ok();
+        }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> LoginUser(int id)
+        {
+            bool isLoggedIn = await _userService.LoginUser(id);
+            if (!isLoggedIn)
+            {
+                return NotFound();
+            }
+
+            return Ok();
         }
 
 
