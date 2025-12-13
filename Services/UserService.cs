@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NotionAPI.Context;
+using NotionAPI.DTOs.User;
 using NotionAPI.Models;
 
 namespace NotionAPI.Services
 {
     public interface IuserService
     {
-        public Task<bool> AddUser(Users user);
+        public Task<bool> AddUser(UserDto user);
     }
     public class UserService : IuserService
     {
@@ -16,21 +17,37 @@ namespace NotionAPI.Services
         {
             _context = context;
         }
-        public async Task<bool> AddUser(Users user)
+        public async Task<bool> AddUser(UserDto user)
         {
-            //check the user already exist in the databse
-
-            Users currentUser = await _context.users.Where(u => u.Email == user.Email).FirstOrDefaultAsync();
-
-            if(currentUser != null)
+            try
             {
+                Users currentUser = await _context.users.Where(u => u.Email == user.email).FirstOrDefaultAsync();
+
+                if (currentUser != null)
+                {
+                    return false;
+                }
+
+                Users newUser = new Users()
+                {
+                    Name = user.name,
+                    Email = user.email,
+                    Password = user.password,
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+
+                await _context.users.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+
                 return false;
             }
-
-            await _context.users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
-            return true;
+            
         }
         
     }

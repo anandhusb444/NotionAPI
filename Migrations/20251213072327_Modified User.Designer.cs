@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NotionAPI.Context;
 
@@ -11,9 +12,11 @@ using NotionAPI.Context;
 namespace NotionAPI.Migrations
 {
     [DbContext(typeof(NotionData))]
-    partial class NotionDataModelSnapshot : ModelSnapshot
+    [Migration("20251213072327_Modified User")]
+    partial class ModifiedUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

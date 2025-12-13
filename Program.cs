@@ -1,6 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using NotionAPI.Context;
+using NotionAPI.Services;
+using Scalar.AspNetCore;
 
 namespace NotionAPI
 {
@@ -19,14 +21,20 @@ namespace NotionAPI
 
             builder.Services.AddOpenApi();
 
+            builder.Services.AddScoped<IuserService, UserService>();
+
             var app = builder.Build();
+
+            
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
-            }
+                app.MapScalarApiReference("/scalar/v1");
 
+            }
+            app.MapGet("/", () => Results.Redirect("/scalar/v1"));
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
