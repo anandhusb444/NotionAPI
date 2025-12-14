@@ -8,8 +8,8 @@ namespace NotionAPI.Services
 {
     public interface IuserService
     {
-        public Task<GenericRespones<Users>> AddUser(UserDto user);
-        public Task<bool> LoginUser(int id);
+        public Task<GenericRespones<Users>> AddUser(UserRegister user);
+        public Task<GenericRespones<Users>> LoginUser(UserLogin user);
     }
     public class UserService : IuserService
     {
@@ -19,7 +19,7 @@ namespace NotionAPI.Services
         {
             _context = context;
         }
-        public async Task<GenericRespones<Users>> AddUser(UserDto user)
+        public async Task<GenericRespones<Users>> AddUser(UserRegister user)
         {
             try
             {
@@ -51,21 +51,21 @@ namespace NotionAPI.Services
             }
         }
 
-        public async Task<bool> LoginUser(int id)
+        public async Task<GenericRespones<Users>> LoginUser(UserLogin user)
         {
             try
             {
-                Users user = await _context.users.FindAsync(id);
+                Users userLogin = await _context.users.FirstOrDefaultAsync(u => u.Email == user.email);
 
-                if(user == null)
+                if(userLogin == null)
                 {
-                    return false;
+                    return new GenericRespones<Users>("User not found","Not found",403,null,false);
                 }
-                return true;
+                return new GenericRespones<Users>("User login successful","",200,userLogin,true);
             }
             catch (Exception ex)
             {
-                return false;
+                return new GenericRespones<Users>("Internal server error",ex.Message,500,null,false);
             }
         }
         

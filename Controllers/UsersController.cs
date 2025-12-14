@@ -17,23 +17,23 @@ namespace NotionAPI.Controllers
             _userService = userService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddUser(UserDto user)
+        [HttpPost("Register")]
+        public async Task<IActionResult> AddUser(UserRegister user)
         {
             GenericRespones<Users> isAdded = await _userService.AddUser(user);
 
             if(!isAdded.Status)
             {
-                return BadRequest();
+                return BadRequest(isAdded);
             }
 
-            return Ok();
+            return Ok(isAdded);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> LoginUser(int id)
+        [HttpPost("Login")]
+        public async Task<IActionResult> LoginUser(UserLogin user)
         {
-            bool isLoggedIn = await _userService.LoginUser(id);
+            bool isLoggedIn = await _userService.LoginUser(user);
             if (!isLoggedIn)
             {
                 return NotFound();
