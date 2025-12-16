@@ -17,6 +17,14 @@ namespace NotionAPI.Context
             modelBuilder.Entity<Users>()
                 .HasKey(user => user.Id);
 
+            modelBuilder.Entity<Tasks>()
+                .HasKey(task => task.Id);
+
+            modelBuilder.Entity<Tasks>()
+                .HasOne(u => u.Users)
+                .WithMany(t => t.Tasks)
+                .HasForeignKey(f => f.UserId);
+
             base.OnModelCreating(modelBuilder);
         }
 
