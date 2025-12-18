@@ -2,6 +2,9 @@
 using NotionAPI.Context;
 using NotionAPI.Services;
 using Scalar.AspNetCore;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace NotionAPI
 {
@@ -10,6 +13,9 @@ namespace NotionAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
             // Add services to the container.
 
@@ -23,7 +29,29 @@ namespace NotionAPI
 
             builder.Services.AddScoped<IuserService, UserService>();
 
-            // ✅ FIXED CORS CONFIGURATION
+
+
+            //JWT AUTHENTICATION CONFIGURATION
+            builder.Services.AddAuthentication(option =>
+            {
+                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(option =>
+            {
+                option.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+            });
+
+            //FIXED CORS CONFIGURATION
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("ReactPolicy", policy =>
@@ -36,7 +64,7 @@ namespace NotionAPI
 
             var app = builder.Build();
 
-            // ✅ Must be before HTTPS + Authorization
+            //Must be before HTTPS + Authorization
             app.UseCors("ReactPolicy");
 
             if (app.Environment.IsDevelopment())
@@ -48,6 +76,7 @@ namespace NotionAPI
             app.MapGet("/", () => Results.Redirect("/scalar/v1"));
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
