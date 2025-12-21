@@ -33,7 +33,7 @@ namespace NotionAPI.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> LoginUser(UserLogin user)
         {
-            GenericRespones<Users> isLoggedIn = await _userService.LoginUser(user);
+            GenericRespones<string> isLoggedIn = await _userService.LoginUser(user);
             if (!isLoggedIn.Status)
             {
                 return NotFound(isLoggedIn);
