@@ -12,8 +12,8 @@ using NotionAPI.Context;
 namespace NotionAPI.Migrations
 {
     [DbContext(typeof(NotionData))]
-    [Migration("20251216162713_Task model Initial add")]
-    partial class TaskmodelInitialadd
+    [Migration("20251216164020_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

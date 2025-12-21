@@ -1,6 +1,6 @@
 ﻿namespace NotionAPI.Models
 {
-    public class Tasks
+    public class TodoTasks
     {
         public int? Id { get; set; }
         public string Title { get; set; }

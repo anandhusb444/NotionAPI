@@ -1,4 +1,4 @@
 ﻿namespace NotionAPI.DTOs.User
 {
-    public record UserLogin(string email,string password);
+    public record UserLogin(int id, string email,string password);
 }

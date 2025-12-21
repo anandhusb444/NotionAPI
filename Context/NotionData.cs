@@ -9,18 +9,18 @@ namespace NotionAPI.Context
         {
 
         }
-
         public DbSet<Users> users { get; set; }
+        public DbSet<TodoTasks> Tasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Users>()
                 .HasKey(user => user.Id);
 
-            modelBuilder.Entity<Tasks>()
+            modelBuilder.Entity<TodoTasks>()
                 .HasKey(task => task.Id);
 
-            modelBuilder.Entity<Tasks>()
+            modelBuilder.Entity<TodoTasks>()
                 .HasOne(u => u.Users)
                 .WithMany(t => t.Tasks)
                 .HasForeignKey(f => f.UserId);

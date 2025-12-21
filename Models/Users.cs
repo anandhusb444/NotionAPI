@@ -11,7 +11,7 @@ namespace NotionAPI.Models
         public string Password { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdateAt { get; set; }
-        public virtual ICollection<Tasks> Tasks { get; set; }
+        public virtual ICollection<TodoTasks> Tasks { get; set; }
 
     }
 }
