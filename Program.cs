@@ -14,7 +14,8 @@ namespace NotionAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var jwtSettings = builder.Configuration.GetSection("Jwt");
+
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
             // Add services to the container.
@@ -28,7 +29,7 @@ namespace NotionAPI
             builder.Services.AddOpenApi();
 
             builder.Services.AddScoped<IuserService, UserService>();
-
+            builder.Services.AddScoped<ITasksServices, TasksServices>();
 
 
             //JWT AUTHENTICATION CONFIGURATION
@@ -42,7 +43,7 @@ namespace NotionAPI
                 option.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidIssuer = jwtSettings["issuer"],
                     ValidateAudience = false,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
