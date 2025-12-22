@@ -34,6 +34,21 @@ namespace NotionAPI.Controllers
             return Ok(result);
         }
 
+        [Authorize]
+        [HttpGet("Get")]
+        public async Task<IActionResult> GetTasks()
+        {
+            string userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userClaim == null) return Unauthorized();
+
+            int userId = int.Parse(userClaim);
+
+            var result = await _taskServeice.GetAllTask(userId);
+
+            return Ok(result);
+        }
+
 
     }
 }

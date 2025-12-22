@@ -1,4 +1,5 @@
-﻿using NotionAPI.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using NotionAPI.Context;
 using NotionAPI.DTOs.Task;
 using NotionAPI.Models;
 using NotionAPI.Utilites;
@@ -12,6 +13,7 @@ namespace NotionAPI.Services
         //update
         //delete
         //get
+        Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId);
     }
 
     public class TasksServices : ITasksServices
@@ -53,8 +55,34 @@ namespace NotionAPI.Services
             {
                 return new GenericRespones<TodoTasks>("Internal server error", ex.Message, 500, null, false);
             }
-            
+        }
 
+        public async Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId)
+        {
+
+            try
+            {
+                Users user = await _context.users.FindAsync(userId);
+
+                if (user == null)
+                {
+                    return new GenericRespones<List<TaskDto>>("User not found", "NOT FOUND", 404, null, false);
+                }
+
+                List<TaskDto> tasks = await _context.Tasks
+                    .Where(task => task.UserId == userId && task.IsCompleted == false)
+                    .Select(task => new TaskDto(
+                        task.Title,
+                        task.Description,
+                        task.IsCompleted))
+                    .ToListAsync();
+
+                return new GenericRespones<List<TaskDto>>("Tasks retrieved successfully", "OK", 200, tasks, true);
+            }
+            catch (Exception ex)
+            {
+                return new GenericRespones<List<TaskDto>>("Internal server error", ex.Message, 500, null, false);
+            }
         }
     }
 }
