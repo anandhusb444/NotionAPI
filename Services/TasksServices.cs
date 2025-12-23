@@ -72,6 +72,7 @@ namespace NotionAPI.Services
                 List<TaskDto> tasks = await _context.Tasks
                     .Where(task => task.UserId == userId && task.IsCompleted == false)
                     .Select(task => new TaskDto(
+                        task.Id,
                         task.Title,
                         task.Description,
                         task.IsCompleted))
