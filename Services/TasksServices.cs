@@ -14,6 +14,7 @@ namespace NotionAPI.Services
         //delete
         //get
         Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId);
+        Task<GenericRespones<TaskDto>> GetTaskById(int taskId);
     }
 
     public class TasksServices : ITasksServices
@@ -83,6 +84,29 @@ namespace NotionAPI.Services
             catch (Exception ex)
             {
                 return new GenericRespones<List<TaskDto>>("Internal server error", ex.Message, 500, null, false);
+            }
+        }
+
+        public async Task<GenericRespones<TaskDto>> GetTaskById(int taskId)
+        {
+            try
+            {
+                var tasks = await _context.Tasks.FindAsync(taskId);
+
+                if (tasks == null) return new GenericRespones<TaskDto>("Task not found", "NOT FOUND", 404, null, false);
+
+                TaskDto currentTask = new TaskDto(
+                    tasks.Id,
+                    tasks.Title,
+                    tasks.Description,
+                    tasks.IsCompleted);
+
+                return new GenericRespones<TaskDto>("Task retrieved successfully", "OK", 200, currentTask, true);
+
+            }
+            catch (Exception ex)
+            {
+                return new GenericRespones<TaskDto>("Internal server error", ex.Message, 500, null, false);
             }
         }
     }
