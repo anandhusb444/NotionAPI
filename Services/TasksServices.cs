@@ -8,11 +8,10 @@ namespace NotionAPI.Services
 {
     public interface ITasksServices
     {
-        //Add
         Task<GenericRespones<TodoTasks>> AddTasks(int userId,TaskDto task);
         //update
-        //delete
-        //get
+        Task<GenericRespones<string>> UpdateTask(int taskId);
+        Task<GenericRespones<string>> DeleteTask(int taskId);
         Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId);
         Task<GenericRespones<TaskDto>> GetTaskById(int taskId);
     }
@@ -107,6 +106,30 @@ namespace NotionAPI.Services
             catch (Exception ex)
             {
                 return new GenericRespones<TaskDto>("Internal server error", ex.Message, 500, null, false);
+            }
+        }
+
+        public async Task<GenericRespones<TaskDto>> UpdateTask(int taskId,TaskDto task)
+        {
+            try
+            {
+                var curTask = await _context.Tasks.FindAsync(taskId);
+
+                if (curTask == null) return new GenericRespones<TaskDto>("Task not found", "NOT EXIST", 404, null, false);
+
+                curTask.Description = task.Description;
+                curTask.Title = task.Title;
+                curTask.IsCompleted = task.IsCompleted;
+                curTask.UpdateAt = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+
+
+                return new GenericRespones<TaskDto>("Updated successfuly", "SUCCESS", 200, curTask, true);
+            }
+            catch (Exception ex)
+            {
+                return new GenericRespones<TaskDto>("Internal server error", ex.Message, 500, null,false);
             }
         }
     }
