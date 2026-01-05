@@ -66,6 +66,36 @@ namespace NotionAPI.Controllers
             return Ok(result);
         }
 
+        [HttpPut("Update/id")]
+        public async Task<IActionResult> UpdateTask(int taskId, TaskDto taskDto)
+        {
+            string userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userClaim == null) return Unauthorized();
+
+            var result = await _taskServeice.UpdateTask(taskId,taskDto);
+
+            if (result.StatusCode == 404) return NotFound(result);
+
+            if (!result.Status) return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpDelete("Delete/id")]
+        public async Task<IActionResult> DeleteTask(int taskId)
+        {
+            var userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userClaim == null) return Unauthorized();
+
+            var result = await _taskServeice.DeleteTask(taskId);
+
+            if (result.StatusCode == 404) return NotFound(result);
+
+            if (!result.Status) return BadRequest(result);
+
+            return Ok(result);
+        }
+
 
     }
 }

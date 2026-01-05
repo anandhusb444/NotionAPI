@@ -9,9 +9,8 @@ namespace NotionAPI.Services
     public interface ITasksServices
     {
         Task<GenericRespones<TodoTasks>> AddTasks(int userId,TaskDto task);
-        //update
-        Task<GenericRespones<string>> UpdateTask(int taskId);
-        Task<GenericRespones<string>> DeleteTask(int taskId);
+        Task<GenericRespones<bool>> UpdateTask(int taskId, TaskDto task);
+        Task<GenericRespones<bool>> DeleteTask(int taskId);
         Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId);
         Task<GenericRespones<TaskDto>> GetTaskById(int taskId);
     }
@@ -109,13 +108,13 @@ namespace NotionAPI.Services
             }
         }
 
-        public async Task<GenericRespones<TaskDto>> UpdateTask(int taskId,TaskDto task)
+        public async Task<GenericRespones<bool>> UpdateTask(int taskId,TaskDto task)
         {
             try
             {
                 var curTask = await _context.Tasks.FindAsync(taskId);
 
-                if (curTask == null) return new GenericRespones<TaskDto>("Task not found", "NOT EXIST", 404, null, false);
+                if (curTask == null) return new GenericRespones<bool>("Task not found", "NOT EXIST", 404, false, false);
 
                 curTask.Description = task.Description;
                 curTask.Title = task.Title;
@@ -125,11 +124,31 @@ namespace NotionAPI.Services
                 await _context.SaveChangesAsync();
 
 
-                return new GenericRespones<TaskDto>("Updated successfuly", "SUCCESS", 200, curTask, true);
+                return new GenericRespones<bool>("Updated successfuly", "SUCCESS", 200, true, true);
             }
             catch (Exception ex)
             {
-                return new GenericRespones<TaskDto>("Internal server error", ex.Message, 500, null,false);
+                return new GenericRespones<bool>("Internal server error", ex.Message, 500, false,false);
+            }
+        }
+
+        public async Task<GenericRespones<bool>> DeleteTask(int taskId)
+        {
+            try
+            {
+                var currentTask = await _context.Tasks.FindAsync(taskId);
+
+                if (currentTask == null) return new GenericRespones<bool>("Task id not found", "NOT FOUND", 404, false, false);
+
+                _context.Tasks.Remove(currentTask);
+
+                await _context.SaveChangesAsync();
+
+                return new GenericRespones<bool>($"Successfuly deleted task = {taskId}", null, 200, true, true);
+            }
+            catch (Exception ex)
+            {
+                return new GenericRespones<bool>("Ineternal server error", ex.Message, 500, false, false);
             }
         }
     }
