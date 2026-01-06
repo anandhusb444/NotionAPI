@@ -69,6 +69,7 @@ namespace NotionAPI.Services
                 }
 
                 List<TaskDto> tasks = await _context.Tasks
+                    .AsNoTracking()
                     .Where(task => task.UserId == userId && task.IsCompleted == false)
                     .Select(task => new TaskDto(
                         task.Id,
