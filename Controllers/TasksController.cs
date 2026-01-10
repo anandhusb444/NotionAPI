@@ -18,7 +18,6 @@ namespace NotionAPI.Controllers
             _taskServeice = taskServices;
         }
 
-
         [Authorize]
         [HttpPost("task")]
         public async Task<IActionResult> AddTask(TaskDto task)
@@ -96,6 +95,26 @@ namespace NotionAPI.Controllers
             return Ok(result);
         }
 
+        [HttpGet("NotCompletedTasks")]
+        public async Task<IActionResult> GetNotCompletedTasks()
+        {
+            var userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userClaim == null) return Unauthorized();
+
+            int userId = int.Parse(userClaim);
+
+            var result = await _taskServeice.GetAllNotCompletedTasks(userId);
+
+            if (result.StatusCode == 404) return NotFound(result);
+
+            if(result.Status)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+
+        }
 
     }
 }

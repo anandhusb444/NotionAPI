@@ -13,6 +13,8 @@ namespace NotionAPI.Services
         Task<GenericRespones<bool>> DeleteTask(int taskId);
         Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId);
         Task<GenericRespones<TaskDto>> GetTaskById(int taskId);
+        Task<GenericRespones<List<TaskDto>> GetAllNotCompletedTasks(int userId);
+        Task<GenericRespones<bool>> AddTaskDescription(int taskId, string description);
     }
 
     public class TasksServices : ITasksServices
@@ -58,7 +60,6 @@ namespace NotionAPI.Services
 
         public async Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId)
         {
-
             try
             {
                 Users user = await _context.users.FindAsync(userId);
@@ -150,6 +151,36 @@ namespace NotionAPI.Services
             catch (Exception ex)
             {
                 return new GenericRespones<bool>("Ineternal server error", ex.Message, 500, false, false);
+            }
+        }
+
+        public async Task<GenericRespones<List<TaskDto>>> GetAllNotCompletedTasks(int userId)
+        {
+            try
+            {
+                var notCompletedTasks = await _context.Tasks.AsNoTracking()
+                    .Where(task => task.UserId == userId && task.IsCompleted == false && task.CreateAt < DateTime.Now)
+                    .ToListAsync();
+
+                if(notCompletedTasks == null)
+                {
+                    return new GenericRespones<List<TaskDto>>("No Task found", "NOT FOUND", 404, null, false);
+                }
+
+                List<TaskDto> taskDto = notCompletedTasks.Select(task => new TaskDto(
+                    task.Id,
+                    task.Title,
+                    task.Description,
+                    task.IsCompleted)).ToList();
+
+
+                return new GenericRespones<List<TaskDto>>("Tasks retrieved successfully", "OK", 200, taskDto, true);
+
+
+            }
+            catch (Exception ex)
+            {
+                return new GenericRespones<List<TaskDto>>("Internal server error", "", 500, null, false);
             }
         }
     }
