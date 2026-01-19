@@ -1,4 +1,4 @@
 ﻿namespace NotionAPI.DTOs.Task
 {
-    public record DescriptionDto (int Id , string Description);
+    public record DescriptionDto (int? Id , string Description);
 }

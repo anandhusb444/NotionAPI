@@ -9,12 +9,12 @@ namespace NotionAPI.Services
     public interface ITasksServices
     {
         Task<GenericRespones<TodoTasks>> AddTasks(int userId,TaskDto task);
-        Task<GenericRespones<bool>> UpdateTask(int taskId, TaskDto task);
+        Task<GenericRespones<bool>> UpdateTask(int taskId, TaskGetDto task);
         Task<GenericRespones<bool>> DeleteTask(int taskId);
-        Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId);
+        Task<GenericRespones<List<TaskGetDto>>> GetAllTask(int userId);
         Task<GenericRespones<TaskDto>> GetTaskById(int taskId);
-        Task<GenericRespones<List<TaskDto>> GetAllNotCompletedTasks(int userId);
-        Task<GenericRespones<bool>> AddTaskDescription(int taskId, string description);
+        Task<GenericRespones<List<TaskDto>>> GetAllNotCompletedTasks(int userId);
+        Task<GenericRespones<bool>> AddTaskDescription(int taskId, DescriptionDto description);
     }
 
     public class TasksServices : ITasksServices
@@ -41,7 +41,6 @@ namespace NotionAPI.Services
                 TodoTasks userTask = new TodoTasks()
                 {
                     Title = taks.Title,
-                    Description = taks.Description,
                     IsCompleted = taks.IsCompleted,
                     CreateAt = DateTime.UtcNow,
                     UserId = userId
@@ -58,7 +57,7 @@ namespace NotionAPI.Services
             }
         }
 
-        public async Task<GenericRespones<List<TaskDto>>> GetAllTask(int userId)
+        public async Task<GenericRespones<List<TaskGetDto>>> GetAllTask(int userId)
         {
             try
             {
@@ -66,24 +65,24 @@ namespace NotionAPI.Services
 
                 if (user == null)
                 {
-                    return new GenericRespones<List<TaskDto>>("User not found", "NOT FOUND", 404, null, false);
+                    return new GenericRespones<List<TaskGetDto>>("User not found", "NOT FOUND", 404, null, false);
                 }
 
-                List<TaskDto> tasks = await _context.Tasks
+                List<TaskGetDto> tasks = await _context.Tasks
                     .AsNoTracking()
                     .Where(task => task.UserId == userId && task.IsCompleted == false)
-                    .Select(task => new TaskDto(
-                        task.Id,
-                        task.Title,
-                        task.Description,
-                        task.IsCompleted))
+                    .Select(taskD => new TaskGetDto(
+                        taskD.Id,
+                        taskD.Title,
+                        taskD.TaskDescription.Select( d=> new DescriptionDto(d.Id,d.Description)).ToList(),
+                        taskD.IsCompleted))
                     .ToListAsync();
 
-                return new GenericRespones<List<TaskDto>>("Tasks retrieved successfully", "OK", 200, tasks, true);
+                return new GenericRespones<List<TaskGetDto>>("Tasks retrieved successfully", "OK", 200, tasks, true);
             }
             catch (Exception ex)
             {
-                return new GenericRespones<List<TaskDto>>("Internal server error", ex.Message, 500, null, false);
+                return new GenericRespones<List<TaskGetDto>>("Internal server error", ex.Message, 500, null, false);
             }
         }
 
@@ -98,7 +97,6 @@ namespace NotionAPI.Services
                 TaskDto currentTask = new TaskDto(
                     tasks.Id,
                     tasks.Title,
-                    tasks.Description,
                     tasks.IsCompleted);
 
                 return new GenericRespones<TaskDto>("Task retrieved successfully", "OK", 200, currentTask, true);
@@ -110,7 +108,7 @@ namespace NotionAPI.Services
             }
         }
 
-        public async Task<GenericRespones<bool>> UpdateTask(int taskId,TaskDto task)
+        public async Task<GenericRespones<bool>> UpdateTask(int taskId,TaskGetDto task)
         {
             try
             {
@@ -118,7 +116,6 @@ namespace NotionAPI.Services
 
                 if (curTask == null) return new GenericRespones<bool>("Task not found", "NOT EXIST", 404, false, false);
 
-                curTask.Description = task.Description;
                 curTask.Title = task.Title;
                 curTask.IsCompleted = task.IsCompleted;
                 curTask.UpdateAt = DateTime.Now;
@@ -170,17 +167,41 @@ namespace NotionAPI.Services
                 List<TaskDto> taskDto = notCompletedTasks.Select(task => new TaskDto(
                     task.Id,
                     task.Title,
-                    task.Description,
                     task.IsCompleted)).ToList();
 
 
                 return new GenericRespones<List<TaskDto>>("Tasks retrieved successfully", "OK", 200, taskDto, true);
-
-
             }
             catch (Exception ex)
             {
                 return new GenericRespones<List<TaskDto>>("Internal server error", "", 500, null, false);
+            }
+        }
+
+        public async Task<GenericRespones<bool>> AddTaskDescription(int taskId, DescriptionDto description)
+        {
+            try
+            {
+                var task = await _context.Tasks.FindAsync(taskId);
+
+                if (task == null)
+                {
+                    return new GenericRespones<bool>("Task not found", "NOT FOUND", 404, false, false);
+                }
+
+                await _context.TaskDescription.AddAsync(new TaskDescription
+                {
+                    TaskTd = taskId,
+                    Description = description.Description
+                });
+
+                await _context.SaveChangesAsync();
+
+                return new GenericRespones<bool>("Description added successfully", "SUCCESS", 200, true, true);
+            }
+            catch (Exception ex)
+            {
+                return new GenericRespones<bool>("Internal server error", null, 500, false,false);
             }
         }
     }

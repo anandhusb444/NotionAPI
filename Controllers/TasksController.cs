@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NotionAPI.DTOs.Task;
@@ -21,7 +22,7 @@ namespace NotionAPI.Controllers
         [Authorize]
         [HttpPost("task")]
         public async Task<IActionResult> AddTask(TaskDto task)
-        {
+         {
             string userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userClaim == null) return Unauthorized();
@@ -29,6 +30,20 @@ namespace NotionAPI.Controllers
             int userId = int.Parse(userClaim);
 
             var result = await _taskServeice.AddTasks(userId, task);
+
+            return Ok(result);
+        }
+
+        [HttpPost("AddDescription")]
+        public async Task<IActionResult> AddTaskDescription(int taskId, DescriptionDto description)
+        {
+            var result = await _taskServeice.AddTaskDescription(taskId, description);
+
+            if (result.StatusCode == 404)
+                return NotFound("Task not found");
+
+            if (!result.Status)
+                return BadRequest();
 
             return Ok(result);
         }
@@ -65,8 +80,28 @@ namespace NotionAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Update/id")]
-        public async Task<IActionResult> UpdateTask(int taskId, TaskDto taskDto)
+        [HttpGet("NotCompletedTasks")]
+        public async Task<IActionResult> GetNotCompletedTasks()
+        {
+            var userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userClaim == null) return Unauthorized();
+
+            int userId = int.Parse(userClaim);
+
+            var result = await _taskServeice.GetAllNotCompletedTasks(userId);
+
+            if (result.StatusCode == 404) return NotFound(result);
+
+            if (result.Status)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTask(int taskId, TaskGetDto taskDto)
         {
             string userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userClaim == null) return Unauthorized();
@@ -80,7 +115,7 @@ namespace NotionAPI.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("Delete/id")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int taskId)
         {
             var userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -94,27 +129,5 @@ namespace NotionAPI.Controllers
 
             return Ok(result);
         }
-
-        [HttpGet("NotCompletedTasks")]
-        public async Task<IActionResult> GetNotCompletedTasks()
-        {
-            var userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userClaim == null) return Unauthorized();
-
-            int userId = int.Parse(userClaim);
-
-            var result = await _taskServeice.GetAllNotCompletedTasks(userId);
-
-            if (result.StatusCode == 404) return NotFound(result);
-
-            if(result.Status)
-            {
-                return Ok(result);
-            }
-
-            return BadRequest(result);
-
-        }
-
     }
 }
