@@ -112,7 +112,7 @@ namespace NotionAPI.Controllers
 
             if (!result.Status) return BadRequest(result);
 
-            return Ok(result);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -127,7 +127,7 @@ namespace NotionAPI.Controllers
 
             if (!result.Status) return BadRequest(result);
 
-            return Ok(result);
+            return NoContent();
         }
     }
 }
