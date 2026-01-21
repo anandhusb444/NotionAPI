@@ -34,10 +34,10 @@ namespace NotionAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPost("AddDescription")]
-        public async Task<IActionResult> AddTaskDescription(int taskId, DescriptionDto description)
+        [HttpPost("{Id}")]
+        public async Task<IActionResult> AddTaskDescription(int Id, DescriptionDto description)
         {
-            var result = await _taskServeice.AddTaskDescription(taskId, description);
+            var result = await _taskServeice.AddTaskDescription(Id, description);
 
             if (result.StatusCode == 404)
                 return NotFound("Task not found");
@@ -101,7 +101,7 @@ namespace NotionAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTask(int taskId, TaskGetDto taskDto)
+        public async Task<IActionResult> UpdateTask(int taskId,TaskGetDto taskDto)
         {
             string userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userClaim == null) return Unauthorized();
