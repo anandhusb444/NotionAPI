@@ -116,12 +116,12 @@ namespace NotionAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTask(int taskId)
+        public async Task<IActionResult> DeleteTask(int id)
         {
             var userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userClaim == null) return Unauthorized();
 
-            var result = await _taskServeice.DeleteTask(taskId);
+            var result = await _taskServeice.DeleteTask(id);
 
             if (result.StatusCode == 404) return NotFound(result);
 

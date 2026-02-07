@@ -135,11 +135,11 @@ namespace NotionAPI.Services
         {
             try
             {
-                var currentTask = await _context.Tasks.FindAsync(taskId);
+                var currentTask = await _context.TaskDescription.FindAsync(taskId);
 
                 if (currentTask == null) return new GenericRespones<bool>("Task id not found", "NOT FOUND", 404, false, false);
 
-                _context.Tasks.Remove(currentTask);
+                _context.TaskDescription.Remove(currentTask);
 
                 await _context.SaveChangesAsync();
 
