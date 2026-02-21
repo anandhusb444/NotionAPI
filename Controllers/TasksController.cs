@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NotionAPI.DTOs.Task;
 using NotionAPI.Services;
+using NotionAPI.Utilites;
 using System.Security.Claims;
 
 namespace NotionAPI.Controllers
@@ -49,7 +50,7 @@ namespace NotionAPI.Controllers
         }
 
         [Authorize]
-        [HttpGet("Get")]
+        [HttpGet("Get")]// need to remove the get
         public async Task<IActionResult> GetTasks()
         {
             string userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -100,13 +101,25 @@ namespace NotionAPI.Controllers
             return BadRequest(result);
         }
 
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateTaskDescriptio(int id,DescriptionDto description)
+        {
+            GenericRespones<bool> result = await _taskServeice.UpdateDescription(id, description);
+
+            if(result.StatusCode == 404 ) return NotFound(result);
+
+            if (!result.Status) return BadRequest(result);
+
+            return Ok(result);
+        }
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTask(int taskId,TaskGetDto taskDto)
+        public async Task<IActionResult> UpdateTask(int id,TaskGetDto taskDto)
         {
             string userClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userClaim == null) return Unauthorized();
 
-            var result = await _taskServeice.UpdateTask(taskId,taskDto);
+            var result = await _taskServeice.UpdateTask(id,taskDto);
 
             if (result.StatusCode == 404) return NotFound(result);
 

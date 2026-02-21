@@ -15,6 +15,7 @@ namespace NotionAPI.Services
         Task<GenericRespones<TaskDto>> GetTaskById(int taskId);
         Task<GenericRespones<List<TaskDto>>> GetAllNotCompletedTasks(int userId);
         Task<GenericRespones<bool>> AddTaskDescription(int taskId, DescriptionDto description);
+        Task<GenericRespones<bool>> UpdateDescription(int taskId, DescriptionDto description);
     }
 
     public class TasksServices : ITasksServices
@@ -203,6 +204,31 @@ namespace NotionAPI.Services
             {
                 return new GenericRespones<bool>("Internal server error", null, 500, false,false);
             }
+        }
+
+        public async Task<GenericRespones<bool>> UpdateDescription(int taskId,DescriptionDto description)
+        {
+            try
+            {
+                var userTask = await _context.TaskDescription.FindAsync(taskId);
+
+                if(userTask == null)
+                {
+                    return new GenericRespones<bool>("Task not found", "NOT FOUND", 404, false, false);
+                }
+
+                userTask.Description = description.Description;
+                await _context.SaveChangesAsync();
+
+                return new GenericRespones<bool>("Description updated successfully", "SUCCESS", 200, true, true);
+
+
+            }
+            catch (Exception ex)
+            {
+                return new GenericRespones<bool>("Internal server error", ex.Message, 500, false, false);
+            }
+
         }
     }
 }
